@@ -4,12 +4,16 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
+import { JWT_SECRET_KEY } from 'src/constants/jwt';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const jwt = require('jsonwebtoken');
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(private configService: ConfigService) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -23,14 +27,14 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const decoded = jwt.verify(token, 'hubabuba');
+      const decoded = jwt.verify(token, this.configService.get(JWT_SECRET_KEY));
       // add userId to req
       request['userId'] = decoded.sub;
 
       return true;
     } catch (e) {
       console.log(e);
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException(e);
     }
   }
 }

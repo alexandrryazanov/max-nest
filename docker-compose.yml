@@ -1,0 +1,18 @@
+version: "3.4"
+
+services:
+  database:
+    image: postgres:13-alpine
+    restart: always
+    container_name: max-nest
+    environment:
+      - POSTGRES_DB=max-nest
+      - POSTGRES_USER=max
+      - POSTGRES_PASSWORD=maxmax
+    volumes:
+      - db-data:/var/lib/postgresql/data-nest:rw
+    ports:
+      - "5432:5432"
+
+volumes:
+  db-data: {}
