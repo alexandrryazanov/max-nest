@@ -4,9 +4,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EXPIRES_IN, JWT_SECRET_KEY } from 'src/constants/jwt';
-import { PrismaService } from 'src/prisma.service';
-import { TokenPayload } from 'src/types/jwt';
+import { EXPIRES_IN, JWT_SECRET_KEY } from '../../constants/jwt';
+import { PrismaService } from '../../prisma.service';
+import { TokenPayload } from '../../types/jwt';
 import { randomBytes, pbkdf2Sync } from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -19,7 +19,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  private hashPassword(password: string, salt: string) {
+  hashPassword(password: string, salt: string) {
     return pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
   }
 
