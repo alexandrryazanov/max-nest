@@ -1,6 +1,8 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { LoginUserDto } from './dto/login.dto';
+import { RegisterUserDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -13,27 +15,23 @@ export class AuthController {
   // X 4. user registration
   // X 5. save encrypted password
   // X 6. login EP (look for user with login and encrypt received pwd and check it with saved in db )
-  // X 7. congig service
-  // 8. admin user who can get all users
+  // X 7. config service
+  // X 8. admin user who can get all users
   // X 9. get my user info
-  // 10. validate DTO
+  // X 10. validate DTO
+  //  11. pagination
 
   @Post('register')
   async register(
     @Body()
-    dto: {
-      name: string;
-      age: number;
-      email: string;
-      password: string;
-    },
+    dto: RegisterUserDto,
   ) {
     return this.usersService.register(dto);
   }
 
-  @Post('/login')
+  @Post('login')
   async login(
-    @Body() body: { email: string; password: string },
+    @Body() body: LoginUserDto,
     @Res({ passthrough: true }) response: Response,
   ) {
     const { accessToken, refreshToken } = await this.usersService.login(
@@ -44,7 +42,7 @@ export class AuthController {
     return { accessToken };
   }
 
-  @Post('/refresh')
+  @Post('refresh')
   async refresh(
     @Res({ passthrough: true }) response: Response,
     @Req() request: Request,

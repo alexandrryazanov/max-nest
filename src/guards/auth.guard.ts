@@ -28,8 +28,9 @@ export class AuthGuard implements CanActivate {
 
     try {
       const decoded = jwt.verify(token, this.configService.get(JWT_SECRET_KEY));
-      // add userId to req
+      // add user info to req
       request['userId'] = decoded.sub;
+      request['isAdmin'] = decoded.isAdmin;
 
       return true;
     } catch (e) {

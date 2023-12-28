@@ -60,7 +60,7 @@ export class AuthService {
       throw new BadRequestException('No such user or password incorrect');
     }
 
-    return this.generateTokensPair({ sub: user.id });
+    return this.generateTokensPair({ sub: user.id, isAdmin: user.isAdmin });
   }
 
   async refresh(token: string) {
