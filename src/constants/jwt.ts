@@ -1,5 +1,5 @@
 export enum EXPIRES_IN {
-  ACCESS = '2m',
+  ACCESS = '10s',
   REFRESH = '5m',
 }
 

@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login.dto';
 import { RegisterUserDto } from './dto/register.dto';
+import { COOKIE_OPTIONS } from '../../constants/cookie';
 
 @Controller('auth')
 export class AuthController {
@@ -38,7 +39,7 @@ export class AuthController {
       body.email,
       body.password,
     );
-    response.cookie('refreshToken', refreshToken, { httpOnly: true });
+    response.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
     return { accessToken };
   }
 
@@ -50,7 +51,7 @@ export class AuthController {
     const { accessToken, refreshToken } = await this.usersService.refresh(
       request.cookies['refreshToken'],
     );
-    response.cookie('refreshToken', refreshToken, { httpOnly: true });
+    response.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
     return { accessToken };
   }
 }
