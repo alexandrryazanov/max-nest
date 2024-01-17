@@ -24,8 +24,9 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsers() {
-    return this.prisma.user.findMany({
+  async getAllUsers(limit: number = 10, offset: number = 0) {
+    const amount = await this.prisma.user.count();
+    const list = await this.prisma.user.findMany({
       select: {
         id: true,
         name: true,
@@ -33,7 +34,12 @@ export class UsersService {
         age: true,
         isAdmin: true,
       },
+      take: limit,
+      skip: offset,
+      orderBy: { id: 'asc' },
     });
+
+    return { amount, list };
   }
 
   async deleteUserById(id: number) {
