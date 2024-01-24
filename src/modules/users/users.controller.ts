@@ -11,7 +11,7 @@ import { UsersService } from './users.service';
 import { AuthGuard } from '../../guards/auth.guard';
 import { UserId } from '../../decorators/user-id.decorator';
 import { AdminGuard } from '../../guards/admin.guard';
-import { GetAllUsersDto } from '../auth/dto/get-all.dto';
+import { GetAllUsersDto } from './dto/get-all.dto';
 
 @Controller('users')
 export class UsersController {
@@ -41,3 +41,11 @@ export class UsersController {
     return this.usersService.deleteUserById(id);
   }
 }
+
+// GET /users
+// GET /users/1
+
+//TODO:
+// GET /posts?limit=10&offset=0
+// GET /posts/1
+// GET /posts/1/comments?limit=100&offset=0
