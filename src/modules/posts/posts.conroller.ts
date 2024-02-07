@@ -36,10 +36,7 @@ export class PostsController {
   }
 }
 
-// GET /users
-// GET /users/1
-
 //TODO:
-// GET /posts?limit=10&offset=0
-// GET /posts/1
-// GET /posts/1/comments?limit=100&offset=0
+// Х GET /posts?limit=10&offset=0
+// Х GET /posts/1
+// О GET /posts/1/comments?limit=100&offset=0
