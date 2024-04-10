@@ -11,6 +11,7 @@ import { AuthGuard } from '../../guards/auth.guard';
 import { GetAllPostsDto } from './dto/get-all-posts.dto';
 import { PostsService } from './posts.service';
 import { UserId } from '../../decorators/user-id.decorator';
+import { GetPostCommentsDto } from './dto/get-post-comments.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -34,9 +35,17 @@ export class PostsController {
   ) {
     return this.postsService.deletePostById(postId, userId);
   }
+
+  @Get(':id/comments')
+  getPostCommentsById(
+    @Query() { limit, offset }: GetPostCommentsDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.postsService.getPostCommentsById(id, limit, offset);
+  }
 }
 
 //TODO:
-// GET /posts?limit=10&offset=0
-// GET /posts/1
+// X GET /posts?limit=10&offset=0
+// X GET /posts/1
 // GET /posts/1/comments?limit=100&offset=0

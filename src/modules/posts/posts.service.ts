@@ -64,4 +64,34 @@ export class PostsService {
   }
 
   // async create({ title, description }: CreatePostDto) {}
+
+  async getPostCommentsById(
+    postId: number,
+    limit: number = 30,
+    offset: number = 0,
+  ) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+
+    if (!post) {
+      throw new NotFoundException('No such post');
+    }
+
+    const comments = await this.prisma.comment.findMany({
+      where: { postId },
+      select: {
+        id: true,
+        text: true,
+        authorId: true,
+        createdAt: true,
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!comments.length) {
+      throw new NotFoundException(`No comments for post ${postId}`);
+    }
+
+    return comments;
+  }
 }
