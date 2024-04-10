@@ -28,6 +28,7 @@ model Post {
   id          Int       @id @default(autoincrement())
   title       String
   description String?
+  images      String[]
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId    Int
   comments    Comment[]

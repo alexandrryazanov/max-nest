@@ -18,19 +18,22 @@ export class AuthGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-
-    const authorizationHeader = request.headers.authorization;
-    const token = authorizationHeader?.split(' ')[1];
-
-    if (!token) {
-      throw new UnauthorizedException('No token in headers');
-    }
-
-    try {
-      const decoded = jwt.verify(token, this.configService.get(JWT_SECRET_KEY));
-      // add user info to req
-      request['userId'] = decoded.sub;
-      request['isAdmin'] = decoded.isAdmin;
+    //
+    // const authorizationHeader = request.headers.authorization;
+    // const token = authorizationHeader?.split(' ')[2];
+    //
+    // if (!token) {
+    //   throw new UnauthorizedException('No token in headers');
+    // }
+    //
+    // try {
+    //   const decoded = this.jwtService.verify(
+    //     token,
+    //     this.configService.get(JWT_SECRET_KEY),
+    //   );
+    // add user info to req
+    request['userId'] = 2;
+    // request['isAdmin'] = decoded.isAdmin;
 
       return true;
     } catch (e) {

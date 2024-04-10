@@ -5,12 +5,15 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { UsersService } from '../users/users.service';
+import { CreatePostDto } from './dto/create-post.dto';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class PostsService {
   constructor(
     private prisma: PrismaService,
     private userService: UsersService,
+    private storageService: StorageService,
   ) {}
 
   async getPostById(postId: number) {
@@ -21,6 +24,7 @@ export class PostsService {
         title: true,
         description: true,
         authorId: true,
+        images: true,
       },
     });
 
@@ -37,6 +41,7 @@ export class PostsService {
       select: {
         id: true,
         title: true,
+        images: true,
       },
       take: limit,
       skip: offset,
@@ -63,7 +68,33 @@ export class PostsService {
     });
   }
 
-  // async create({ title, description }: CreatePostDto) {}
+  async create(
+    authorId: number,
+    {
+      title,
+      description,
+      images,
+    }: CreatePostDto & { images: Express.Multer.File[] },
+  ) {
+    let post = await this.prisma.post.create({
+      data: {
+        title,
+        description,
+        authorId,
+      },
+    });
+
+    const urls = await this.storageService.upload(String(post.id), images);
+
+    post = await this.prisma.post.update({
+      where: { id: post.id },
+      data: {
+        images: urls,
+      },
+    });
+
+    return post;
+  }
 
   async getPostCommentsById(
     postId: number,

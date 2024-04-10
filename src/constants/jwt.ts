@@ -5,3 +5,4 @@ export enum EXPIRES_IN {
 }
 
 export const JWT_SECRET_KEY = 'JWT_SECRET_KEY';
+export const BACKEND_URL = 'BACKEND_URL';
