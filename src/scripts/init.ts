@@ -2,6 +2,7 @@ import { PrismaService } from '../prisma.service';
 import { randomBytes } from 'crypto';
 import { AuthService } from '../modules/auth/auth.service';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 async function main() {
   console.log('Seeding test data in DB...');
@@ -12,6 +13,7 @@ async function main() {
     const password = new AuthService(
       new PrismaService(),
       new ConfigService(),
+      new JwtService(),
     ).hashPassword('qwerty', salt);
 
     await prisma.user.create({

@@ -8,15 +8,14 @@ import { EXPIRES_IN, JWT_SECRET_KEY } from '../../constants/jwt';
 import { PrismaService } from '../../prisma.service';
 import { TokenPayload } from '../../types/jwt';
 import { randomBytes, pbkdf2Sync } from 'crypto';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwt = require('jsonwebtoken');
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    private jwtService: JwtService,
   ) {}
 
   hashPassword(password: string, salt: string) {
@@ -69,7 +68,7 @@ export class AuthService {
     }
 
     try {
-      const decoded = jwt.verify(token, this.secretKey);
+      const decoded = this.jwtService.verify(token, this.secretKey);
       return this.generateTokensPair({ sub: decoded.sub });
     } catch (e) {
       throw new UnauthorizedException(e);
@@ -77,10 +76,12 @@ export class AuthService {
   }
 
   private generateTokensPair(payload: TokenPayload) {
-    const accessToken = jwt.sign(payload, this.secretKey, {
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.secretKey,
       expiresIn: EXPIRES_IN.ACCESS,
     });
-    const refreshToken = jwt.sign(payload, this.secretKey, {
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.secretKey,
       expiresIn: EXPIRES_IN.REFRESH,
     });
 

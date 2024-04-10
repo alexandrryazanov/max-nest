@@ -1,9 +1,11 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Param,
   ParseIntPipe,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +14,8 @@ import { AuthGuard } from '../../guards/auth.guard';
 import { UserId } from '../../decorators/user-id.decorator';
 import { AdminGuard } from '../../guards/admin.guard';
 import { GetAllUsersDto } from './dto/get-all.dto';
+import { EmailChangeDto } from './dto/email-change.dto';
+import { EmailConfirmDto } from './dto/email-confirm.dto';
 
 @Controller('users')
 export class UsersController {
@@ -40,12 +44,17 @@ export class UsersController {
   deleteUserById(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.deleteUserById(id);
   }
+
+  @Post('me/email/change')
+  @UseGuards(AuthGuard)
+  async emailChange(@Body() body: EmailChangeDto) {
+    await this.usersService.changeUserEmail(body.email);
+    return;
+  }
+
+  @Post('me/email/confirm')
+  @UseGuards(AuthGuard)
+  async emailConfirm(@Body() body: EmailConfirmDto, @UserId() userId: number) {
+    return await this.usersService.confirmUserEmail(body.magicToken, userId);
+  }
 }
-
-// GET /users
-// GET /users/1
-
-//TODO:
-// GET /posts?limit=10&offset=0
-// GET /posts/1
-// GET /posts/1/comments?limit=100&offset=0

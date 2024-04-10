@@ -1,9 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
+import { EXPIRES_IN, JWT_SECRET_KEY } from '../../constants/jwt';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
+
+  private secretKey = this.configService.get(JWT_SECRET_KEY, 'secret');
 
   async getUserInfo(userId: number) {
     const user = await this.prisma.user.findUnique({
@@ -54,5 +67,35 @@ export class UsersService {
     });
 
     return true;
+  }
+
+  async changeUserEmail(email: string) {
+    const magicToken = this.jwtService.sign(
+      { email },
+      {
+        secret: this.secretKey,
+        expiresIn: EXPIRES_IN.MAGIC_TOKEN,
+      },
+    );
+    const magicLink =
+      'http://localhost:3000/profile/changemail?magicToken=' + magicToken;
+    console.log(magicLink);
+  }
+
+  async confirmUserEmail(magicToken: string, userId: number) {
+    try {
+      const { email } = this.jwtService.verify(magicToken, {
+        secret: this.secretKey,
+      });
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          email,
+        },
+      });
+    } catch (e) {
+      console.log(e);
+      throw new UnauthorizedException(e);
+    }
   }
 }
