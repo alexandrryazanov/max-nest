@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -7,6 +8,7 @@ import { PrismaService } from 'src/prisma.service';
 import { UsersService } from '../users/users.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { StorageService } from '../storage/storage.service';
+import { AVAILABLE_IMAGE_TYPES } from './posts.constants';
 
 @Injectable()
 export class PostsService {
@@ -63,9 +65,12 @@ export class PostsService {
       throw new ForbiddenException('No permission');
     }
 
-    return this.prisma.post.delete({
+    const result = await this.prisma.post.delete({
       where: { id: postId },
     });
+    await this.storageService.deleteDirectory(String(postId));
+
+    return result;
   }
 
   async create(
@@ -83,6 +88,13 @@ export class PostsService {
         authorId,
       },
     });
+    for (const image of images) {
+      if (!AVAILABLE_IMAGE_TYPES[image.mimetype]) {
+        throw new BadRequestException(
+          `Wrong file type of ${image.originalname}`,
+        );
+      }
+    }
 
     const urls = await this.storageService.upload(String(post.id), images);
 

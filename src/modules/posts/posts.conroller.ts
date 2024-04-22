@@ -44,10 +44,7 @@ export class PostsController {
     @UserId() userId: number,
     @UploadedFiles(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 100000000000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 100000000000 })],
       }),
     )
     images: Express.Multer.File[],
