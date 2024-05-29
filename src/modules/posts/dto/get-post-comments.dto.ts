@@ -1,7 +1,9 @@
 import { IsInt, IsOptional, IsPositive, Max } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetPostCommentsDto {
+  @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
   @Type(() => Number)
@@ -9,6 +11,7 @@ export class GetPostCommentsDto {
   @IsPositive()
   limit?: number;
 
+  @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
   @IsPositive()

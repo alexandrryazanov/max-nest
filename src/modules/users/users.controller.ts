@@ -16,12 +16,23 @@ import { AdminGuard } from '../../guards/admin.guard';
 import { GetAllUsersDto } from './dto/get-all.dto';
 import { EmailChangeDto } from './dto/email-change.dto';
 import { EmailConfirmDto } from './dto/email-confirm.dto';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { getMeResponse } from './dto/get-me.dto';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
+  @ApiOperation({ summary: 'Get current user info' })
+  @ApiResponse(getMeResponse)
+  @ApiBearerAuth('accessToken')
   @UseGuards(AuthGuard)
   getCurrentInfo(@UserId() userId: number) {
     return this.usersService.getUserInfo(userId);

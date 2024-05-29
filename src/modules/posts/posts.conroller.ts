@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  FileTypeValidator,
   Get,
   MaxFileSizeValidator,
   Param,
@@ -21,14 +20,16 @@ import { UserId } from '../../decorators/user-id.decorator';
 import { GetPostCommentsDto } from './dto/get-post-comments.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Posts')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  getAllPosts(@Query() { limit, offset }: GetAllPostsDto) {
-    return this.postsService.getAlLPosts(limit, offset);
+  getAllPosts(@Query() { limit, offset, search }: GetAllPostsDto) {
+    return this.postsService.getAlLPosts(limit, offset, search);
   }
 
   @Get(':id')

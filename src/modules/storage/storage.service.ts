@@ -43,8 +43,3 @@ export class StorageService {
     return urls;
   }
 }
-
-// TODO
-// [x] not only jpg
-// compression
-// [x] when we delete post - images should be deleted

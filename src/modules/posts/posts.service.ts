@@ -9,6 +9,7 @@ import { UsersService } from '../users/users.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { StorageService } from '../storage/storage.service';
 import { AVAILABLE_IMAGE_TYPES } from './posts.constants';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostsService {
@@ -37,12 +38,23 @@ export class PostsService {
     return post;
   }
 
-  async getAlLPosts(limit: number = 30, offset: number = 0) {
-    const amount = await this.prisma.post.count();
+  async getAlLPosts(limit: number = 30, offset: number = 0, search?: string) {
+    const where: Prisma.PostWhereInput = {
+      OR: search
+        ? [
+            { title: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+          ]
+        : undefined,
+    };
+
+    const amount = await this.prisma.post.count({ where });
     const list = await this.prisma.post.findMany({
+      where,
       select: {
         id: true,
         title: true,
+        description: true,
         images: true,
       },
       take: limit,
