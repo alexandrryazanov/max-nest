@@ -7,12 +7,14 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
 import { JWT_SECRET_KEY } from 'src/constants/jwt';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwt = require('jsonwebtoken');
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private jwtService: JwtService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
