@@ -1,4 +1,7 @@
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  ArrayNotEmpty,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -21,4 +24,12 @@ export class CreatePostDto {
   @MinLength(10)
   @MaxLength(200)
   description?: string;
+
+  @ApiProperty()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @MinLength(2, { each: true })
+  @MaxLength(15, { each: true })
+  tags: string[];
 }

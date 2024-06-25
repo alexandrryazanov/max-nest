@@ -28,6 +28,7 @@ export class PostsService {
         description: true,
         authorId: true,
         images: true,
+        tags: { select: { name: true } },
       },
     });
 
@@ -35,7 +36,7 @@ export class PostsService {
       throw new NotFoundException('No such post');
     }
 
-    return post;
+    return { ...post, tags: post.tags.map((t) => t.name) };
   }
 
   async getAlLPosts(limit: number = 30, offset: number = 0, search?: string) {
@@ -56,13 +57,20 @@ export class PostsService {
         title: true,
         description: true,
         images: true,
+        tags: { select: { name: true } },
       },
       take: limit,
       skip: offset,
       orderBy: { createdAt: 'desc' },
     });
 
-    return { amount, list };
+    return {
+      amount,
+      list: list.map((item) => ({
+        ...item,
+        tags: item.tags.map((t) => t.name),
+      })),
+    };
   }
 
   async deletePostById(postId: number, userId: number) {
@@ -91,6 +99,7 @@ export class PostsService {
       title,
       description,
       images,
+      tags,
     }: CreatePostDto & { images: Express.Multer.File[] },
   ) {
     let post = await this.prisma.post.create({
@@ -98,8 +107,22 @@ export class PostsService {
         title,
         description,
         authorId,
+        tags: {
+          connectOrCreate: tags.map((name) => ({
+            where: { name },
+            create: { name },
+          })),
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        images: true,
+        tags: { select: { name: true } },
       },
     });
+
     for (const image of images) {
       if (!AVAILABLE_IMAGE_TYPES[image.mimetype]) {
         throw new BadRequestException(
@@ -115,9 +138,16 @@ export class PostsService {
       data: {
         images: urls,
       },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        images: true,
+        tags: { select: { name: true } },
+      },
     });
 
-    return post;
+    return { ...post, tags: post.tags.map((t) => t.name) };
   }
 
   async getPostCommentsById(

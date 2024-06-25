@@ -41,7 +41,7 @@ export class PostsController {
   @UseGuards(AuthGuard)
   @UseInterceptors(FilesInterceptor('images'))
   createPost(
-    @Body() { title, description }: CreatePostDto,
+    @Body() { title, description, tags }: CreatePostDto,
     @UserId() userId: number,
     @UploadedFiles(
       new ParseFilePipe({
@@ -50,7 +50,12 @@ export class PostsController {
     )
     images: Express.Multer.File[],
   ) {
-    return this.postsService.create(userId, { title, description, images });
+    return this.postsService.create(userId, {
+      title,
+      description,
+      images,
+      tags,
+    });
   }
 
   @Delete(':id')
