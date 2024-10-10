@@ -21,6 +21,8 @@ import { GetPostCommentsDto } from './dto/get-post-comments.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
+import { GetAllTagsDto } from './dto/get-all-tags.dto';
+import { AddCommentDto } from './dto/add-comment.dto';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -28,8 +30,36 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  getAllPosts(@Query() { limit, offset, search }: GetAllPostsDto) {
-    return this.postsService.getAlLPosts(limit, offset, search);
+  getAllPosts(
+    @Query()
+    { limit, offset, search, sort, title, description }: GetAllPostsDto,
+  ) {
+    return this.postsService.getAlLPosts(
+      limit,
+      offset,
+      search,
+      sort,
+      title,
+      description,
+    );
+  }
+
+  @Get('/my')
+  @UseGuards(AuthGuard)
+  getMyPosts(
+    @UserId() userId: number,
+    @Query()
+    { limit, offset, search, sort, title, description }: GetAllPostsDto,
+  ) {
+    return this.postsService.getAlLPosts(
+      limit,
+      offset,
+      search,
+      sort,
+      title,
+      description,
+      userId,
+    );
   }
 
   @Get(':id')
@@ -73,6 +103,30 @@ export class PostsController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.postsService.getPostCommentsById(id, limit, offset);
+  }
+
+  @Post(':id/comments')
+  @UseGuards(AuthGuard)
+  addPostComment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() { text }: AddCommentDto,
+    @UserId() userId: number,
+  ) {
+    return this.postsService.addPostComment(id, userId, text);
+  }
+
+  @Delete('/comments/:id')
+  @UseGuards(AuthGuard)
+  deletePostCommentById(
+    @Param('id', ParseIntPipe) id: number,
+    @UserId() userId: number,
+  ) {
+    return this.postsService.deletePostCommentById(id, userId);
+  }
+
+  @Get('/tags')
+  getAllTags(@Query() { limit, offset }: GetAllTagsDto) {
+    return this.postsService.getAllTags(limit, offset);
   }
 }
 

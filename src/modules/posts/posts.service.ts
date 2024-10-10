@@ -39,14 +39,34 @@ export class PostsService {
     return { ...post, tags: post.tags.map((t) => t.name) };
   }
 
-  async getAlLPosts(limit: number = 30, offset: number = 0, search?: string) {
-    const where: Prisma.PostWhereInput = {
-      OR: search
-        ? [
-            { title: { contains: search, mode: 'insensitive' } },
-            { description: { contains: search, mode: 'insensitive' } },
-          ]
-        : undefined,
+  // sort=+id sort=-title
+  async getAlLPosts(
+    limit: number = 30,
+    offset: number = 0,
+    search?: string,
+    sort?: `${'-' | ''}${string}`,
+    title?: string,
+    description?: string,
+    userId?: number,
+  ) {
+    const order = sort?.substring(0, 1) === '-' ? 'desc' : 'asc';
+    const field = sort?.substring(0, 1) === '-' ? sort.slice(1) : sort;
+
+    const whereSearch: Prisma.PostWhereInput = {
+      OR: [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ],
+    };
+
+    const whereTitleOrDesc: Prisma.PostWhereInput = {
+      title: { contains: title, mode: 'insensitive' },
+      description: { contains: description, mode: 'insensitive' },
+    };
+
+    const where = {
+      authorId: userId,
+      ...(search ? whereSearch : whereTitleOrDesc),
     };
 
     const amount = await this.prisma.post.count({ where });
@@ -58,10 +78,11 @@ export class PostsService {
         description: true,
         images: true,
         tags: { select: { name: true } },
+        author: { select: { name: true, email: true, id: true } },
       },
       take: limit,
       skip: offset,
-      orderBy: { createdAt: 'desc' },
+      orderBy: !sort ? { createdAt: 'desc' } : { [field]: order },
     });
 
     return {
@@ -161,7 +182,11 @@ export class PostsService {
       throw new NotFoundException('No such post');
     }
 
-    const comments = await this.prisma.comment.findMany({
+    const amount = await this.prisma.comment.count({
+      where: { postId },
+    });
+
+    const list = await this.prisma.comment.findMany({
       where: { postId },
       select: {
         id: true,
@@ -173,10 +198,51 @@ export class PostsService {
       skip: offset,
     });
 
-    if (!comments.length) {
-      throw new NotFoundException(`No comments for post ${postId}`);
+    return { amount, list };
+  }
+
+  async getAllTags(limit: number = 30, offset: number = 0) {
+    const amount = await this.prisma.tag.count();
+    const list = await this.prisma.tag.findMany({
+      select: {
+        name: true,
+        id: true,
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    return {
+      amount,
+      list,
+    };
+  }
+
+  async addPostComment(postId: number, userId: number, text: string) {
+    return this.prisma.comment.create({
+      data: {
+        authorId: userId,
+        postId,
+        text,
+      },
+    });
+  }
+
+  async deletePostCommentById(commentId: number, userId: number) {
+    const comment = await this.prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment) throw new NotFoundException('No such comment');
+
+    const user = await this.userService.getUserInfo(userId);
+
+    if (userId !== comment.authorId && !user.isAdmin) {
+      throw new ForbiddenException('This is not your comment');
     }
 
-    return comments;
+    return this.prisma.comment.delete({
+      where: { id: commentId },
+    });
   }
 }

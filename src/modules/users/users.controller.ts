@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Post,
@@ -23,6 +24,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { getMeResponse } from './dto/get-me.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -67,5 +69,19 @@ export class UsersController {
   @UseGuards(AuthGuard)
   async emailConfirm(@Body() body: EmailConfirmDto, @UserId() userId: number) {
     return await this.usersService.confirmUserEmail(body.magicToken, userId);
+  }
+
+  @Post('me/password/change')
+  @HttpCode(200)
+  @UseGuards(AuthGuard)
+  async changePassword(
+    @Body() body: ChangePasswordDto,
+    @UserId() userId: number,
+  ) {
+    return await this.usersService.changePassword(
+      body.oldPassword,
+      body.newPassword,
+      userId,
+    );
   }
 }

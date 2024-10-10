@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,6 +8,7 @@ import { PrismaService } from 'src/prisma.service';
 import { EXPIRES_IN, JWT_SECRET_KEY } from '../../constants/jwt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +16,7 @@ export class UsersService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private authService: AuthService,
   ) {}
 
   private secretKey = this.configService.get(JWT_SECRET_KEY, 'secret');
@@ -97,5 +100,43 @@ export class UsersService {
       console.log(e);
       throw new UnauthorizedException(e);
     }
+  }
+
+  async changePassword(
+    oldPassword: string,
+    newPassword: string,
+    userId: number,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        password: true,
+        salt: true,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('No such user');
+    }
+
+    const oldPasswordHash = this.authService.hashPassword(
+      oldPassword,
+      user.salt,
+    );
+
+    if (oldPasswordHash !== user.password) {
+      throw new BadRequestException('Wrong old password');
+    }
+
+    const newPasswordHash = this.authService.hashPassword(
+      newPassword,
+      user.salt,
+    );
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: newPasswordHash },
+    });
+
+    return true;
   }
 }

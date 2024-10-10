@@ -1,7 +1,7 @@
 import {
   ArrayMaxSize,
-  ArrayMinSize,
   ArrayNotEmpty,
+  IsArray,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -26,6 +26,7 @@ export class CreatePostDto {
   description?: string;
 
   @ApiProperty()
+  @IsArray()
   @ArrayNotEmpty()
   @ArrayMaxSize(10)
   @IsString({ each: true })
