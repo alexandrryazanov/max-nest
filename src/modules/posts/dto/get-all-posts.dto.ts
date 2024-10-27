@@ -1,4 +1,5 @@
 import {
+  ArrayNotEmpty,
   IsIn,
   IsInt,
   IsOptional,
@@ -62,4 +63,12 @@ export class GetAllPostsDto {
   @MinLength(2)
   @MaxLength(50)
   description?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  @MinLength(2, { each: true })
+  @MaxLength(50, { each: true })
+  tags?: string[];
 }

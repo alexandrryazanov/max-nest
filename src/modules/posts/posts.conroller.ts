@@ -32,16 +32,17 @@ export class PostsController {
   @Get()
   getAllPosts(
     @Query()
-    { limit, offset, search, sort, title, description }: GetAllPostsDto,
+    { limit, offset, search, sort, title, description, tags }: GetAllPostsDto,
   ) {
-    return this.postsService.getAlLPosts(
+    return this.postsService.getAlLPosts({
       limit,
       offset,
       search,
       sort,
       title,
       description,
-    );
+      tags,
+    });
   }
 
   @Get('/my')
@@ -52,12 +53,14 @@ export class PostsController {
     { limit, offset, search, sort, title, description }: GetAllPostsDto,
   ) {
     return this.postsService.getAlLPosts(
-      limit,
-      offset,
-      search,
-      sort,
-      title,
-      description,
+      {
+        limit,
+        offset,
+        search,
+        sort,
+        title,
+        description,
+      },
       userId,
     );
   }
@@ -129,8 +132,3 @@ export class PostsController {
     return this.postsService.getAllTags(limit, offset);
   }
 }
-
-//TODO:
-// X GET /posts?limit=10&offset=0
-// X GET /posts/2
-// GET /posts/2/comments?limit=100&offset=0

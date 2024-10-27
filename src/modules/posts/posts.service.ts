@@ -10,6 +10,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { StorageService } from '../storage/storage.service';
 import { AVAILABLE_IMAGE_TYPES } from './posts.constants';
 import { Prisma } from '@prisma/client';
+import { GetAllPostsDto } from './dto/get-all-posts.dto';
 
 @Injectable()
 export class PostsService {
@@ -27,6 +28,7 @@ export class PostsService {
         title: true,
         description: true,
         authorId: true,
+        author: true,
         images: true,
         tags: { select: { name: true } },
       },
@@ -41,12 +43,7 @@ export class PostsService {
 
   // sort=+id sort=-title
   async getAlLPosts(
-    limit: number = 30,
-    offset: number = 0,
-    search?: string,
-    sort?: `${'-' | ''}${string}`,
-    title?: string,
-    description?: string,
+    { limit, offset, search, sort, title, description, tags }: GetAllPostsDto,
     userId?: number,
   ) {
     const order = sort?.substring(0, 1) === '-' ? 'desc' : 'asc';
@@ -57,11 +54,17 @@ export class PostsService {
         { title: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
       ],
+      ...(tags?.length && {
+        AND: tags.map((tag) => ({ tags: { some: { name: tag } } })),
+      }),
     };
 
     const whereTitleOrDesc: Prisma.PostWhereInput = {
       title: { contains: title, mode: 'insensitive' },
       description: { contains: description, mode: 'insensitive' },
+      ...(tags?.length && {
+        AND: tags.map((tag) => ({ tags: { some: { name: tag } } })),
+      }),
     };
 
     const where = {
